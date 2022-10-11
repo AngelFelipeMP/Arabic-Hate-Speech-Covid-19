@@ -12,6 +12,6 @@ if __name__ == "__main__":
     if args.download:
         download_data(config.DATA_PATH, config.DATA_URL)
     if args.process:
-        process_cerist2022_data(config.DATA_PATH, config.DATASET_TEXT)
+        process_cerist2022_data(config.DATA_PATH, config.DATASET_TEXT, config.DATASET_LABEL)
 
 

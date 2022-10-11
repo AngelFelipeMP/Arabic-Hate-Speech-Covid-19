@@ -3,7 +3,7 @@ import shutil
 import pandas as pd
 import gdown
 from preprocess import ArabertPreprocessor
-import config
+# import config
 
 def download_data(data_path, data_urls):
     # create a data folder
@@ -25,8 +25,7 @@ def download_data(data_path, data_urls):
         shutil.rmtree(sorce_folder)
         
 
-# def process_cerist2022_data(data_path, header, text_col, labels_col, index_col, columns_to_read):
-def process_cerist2022_data(data_path, text_col):
+def process_cerist2022_data(data_path, text_col, label_col):
     arabic_prep = ArabertPreprocessor("aubmindlab/bert-base-arabertv2", keep_emojis = True)
     files = [f for f in os.listdir(data_path) if 'processed' not in f]
     
@@ -34,23 +33,13 @@ def process_cerist2022_data(data_path, text_col):
         df = pd.read_csv(data_path + '/' + file, sep='\t', index_col=0)
         print(df.head())
         
+        # preprocess text
         df[text_col] = df.loc[:, text_col].apply(lambda x: arabic_prep.preprocess(x))
         print(df.head())
         
-
-        df.to_csv(data_path + '/' + file + '_preprocessed' + '.tsv', sep='\t',  index_label=0)
-
-
-# def pass_value_config(variable, value):
-#     with open(config.CODE_PATH + '/' + 'config.py', 'r') as conf:
-#         content = conf.read()
-#         new = content.replace(variable + ' = ' + "''", variable + ' = ' +  value )
+        # label text -> num
+        df.replace({label_col:{'Not Hatefull':0, 'Hatefull':1}}, inplace=True)
+        print(df.head())
         
-#     with open(config.CODE_PATH + '/' + 'config.py', 'w') as conf_new:
-#         conf_new.write(new)
 
-
-# def map_labels(df, labels_col):
-#     for col, labels in labels_col.items():
-#         df.replace({col:{number: string for string, number in labels.items()}}, inplace=True)
-#     return df
+        df.to_csv(data_path + '/' + file[:-4] + '_preprocessed' + '.tsv', sep='\t',  index_label=0)
