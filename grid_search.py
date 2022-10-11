@@ -6,6 +6,7 @@ import numpy as np
 import random
 import config
 from tqdm import tqdm
+from utils import PredTools, rename_logs
 
 from model import TransforomerModel
 import warnings
@@ -18,7 +19,7 @@ from transformers import logging
 logging.set_verbosity_error()
 
 
-def run(df_train, df_val, max_len, transformer, batch_size, drop_out, lr, df_results):
+def run(df_train, df_val, max_len, transformer, batch_size, drop_out, lr, df_results, fold):
     
     train_dataset = dataset.TransformerDataset(
         text=df_train[config.DATASET_TEXT].values,
@@ -73,6 +74,9 @@ def run(df_train, df_val, max_len, transformer, batch_size, drop_out, lr, df_res
         optimizer, num_warmup_steps=0, num_training_steps=num_train_steps
     )
     
+    # create obt for save preds class
+    manage_preds = PredTools(df_val, transformer, drop_out, lr, batch_size, max_len)
+    
     for epoch in range(1, config.EPOCHS+1):
         pred_train, targ_train, loss_train = engine.train_fn(train_data_loader, model, optimizer, device, scheduler)
         f1_train = metrics.f1_score(targ_train, pred_train, average='weighted')
@@ -81,6 +85,9 @@ def run(df_train, df_val, max_len, transformer, batch_size, drop_out, lr, df_res
         pred_val, targ_val, loss_val = engine.eval_fn(val_data_loader, model, device)
         f1_val = metrics.f1_score(targ_val, pred_val, average='weighted')
         acc_val = metrics.accuracy_score(targ_val, pred_val)
+        
+        # save epoch preds
+        manage_preds.hold_epoch_preds(pred_val, targ_val, epoch)
         
         df_new_results = pd.DataFrame({'epoch':epoch,
                             'transformer':transformer,
@@ -100,6 +107,15 @@ def run(df_train, df_val, max_len, transformer, batch_size, drop_out, lr, df_res
         
         tqdm.write("Epoch {}/{} f1-macro_training = {:.3f}  accuracy_training = {:.3f}  loss_training = {:.3f} f1-macro_val = {:.3f}  accuracy_val = {:.3f}  loss_val = {:.3f}".format(epoch, config.EPOCHS, f1_train, acc_train, loss_train, f1_val, acc_val, loss_val))
 
+    # save a fold preds
+    manage_preds.concat_fold_preds()
+            
+    # avg and save logs
+    if fold == config.SPLITS:
+        # save all folds preds "gridsearch"
+        manage_preds.save_preds()
+    
+    
     return df_results
 
 if __name__ == "__main__":
@@ -107,6 +123,9 @@ if __name__ == "__main__":
     np.random.seed(config.SEED)
     torch.manual_seed(config.SEED)
     torch.cuda.manual_seed_all(config.SEED)
+    
+    #rename old log files adding date YMD-HMS
+    rename_logs()
 
     df_data = pd.read_csv(config.DATA_PATH + '/' + config.DATASET_TRAIN, sep='\t', nrows=config.N_ROWS)
     skf = StratifiedKFold(n_splits=config.SPLITS, shuffle=True, random_state=config.SEED)
@@ -136,7 +155,7 @@ if __name__ == "__main__":
                 for drop_out in config.DROPOUT:
                     for lr in config.LR:
                         
-                        for fold, (train_index, val_index) in enumerate(skf.split(df_data[config.DATASET_TEXT], df_data[config.DATASET_LABEL])):
+                        for fold, (train_index, val_index) in enumerate(skf.split(df_data[config.DATASET_TEXT], df_data[config.DATASET_LABEL]),start=1):
                             df_train = df_data.loc[train_index]
                             df_val = df_data.loc[val_index]
                             
@@ -149,10 +168,12 @@ if __name__ == "__main__":
                                                 batch_size, 
                                                 drop_out,
                                                 lr,
-                                                df_results
+                                                df_results,
+                                                fold
                             )
                         
                             grid_search_bar.update(1)
+
                         
                         df_results = df_results.groupby(['epoch',
                                                         'transformer',

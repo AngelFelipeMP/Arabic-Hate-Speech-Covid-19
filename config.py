@@ -1,12 +1,12 @@
 import os
 #Hiper-parameters
 SPLITS = 2 #5
-EPOCHS = 1 #5
+EPOCHS = 2 #5
 MAX_LEN = [32] #64
 DROPOUT = [0.3]
 LR = [1e-5]
 BATCH_SIZE = [8] #32
-TRANSFORMERS = ['aubmindlab/bert-base-arabertv02-twitter']
+TRANSFORMERS = ['aubmindlab/bert-base-arabertv02-twitter', 'aubmindlab/araelectra-base-discriminator']
 DEVICE = 'cpu'
 
 N_ROWS= 32 #None
@@ -14,6 +14,7 @@ SEED = 17
 CODE_PATH = os.getcwd()
 REPO_PATH = '/'.join(CODE_PATH.split('/')[0:-1])
 DATA_PATH = REPO_PATH + '/' + 'data'
+LOGS_PATH = REPO_PATH + '/' + 'logs'
 
 
 

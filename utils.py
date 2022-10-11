@@ -1,9 +1,11 @@
 import os
+import re
 import shutil
 import pandas as pd
 import gdown
+import config
 from preprocess import ArabertPreprocessor
-# import config
+from datetime import datetime
 
 def download_data(data_path, data_urls):
     # create a data folder
@@ -41,5 +43,57 @@ def process_cerist2022_data(data_path, text_col, label_col):
         df.replace({label_col:{'Not Hatefull':0, 'Hatefull':1}}, inplace=True)
         print(df.head())
         
-
         df.to_csv(data_path + '/' + file[:-4] + '_preprocessed' + '.tsv', sep='\t',  index_label=0)
+        
+        
+def rename_logs():
+    time_str = datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
+    for file in os.listdir(config.LOGS_PATH):
+        if not bool(re.search(r'\d', file)):
+            os.rename(config.LOGS_PATH + '/' + file, config.LOGS_PATH + '/' + file[:-4] + '_' + time_str + file[-4:])     
+
+
+class PredTools:
+    # def __init__(self, data_dict, model_name, heads, drop_out, num_efl, num_dfl, lr ,batch_size, max_len, transformer):
+    def __init__(self, df_val, model_name, drop_out, lr ,batch_size, max_len):
+        self.file_grid_preds = config.LOGS_PATH + '/' + config.DOMAIN_GRID_SEARCH + '_predictions' +'.tsv'
+        self.file_fold_preds = config.LOGS_PATH + '/' + config.DOMAIN_GRID_SEARCH + '_predictions' + '_fold' +'.tsv'
+        self.df_val = df_val
+        self.list_df = []
+        self.model_name = model_name.split("/")[-1]
+        self.drop_out = drop_out
+        self.lr = lr
+        self.batch_size = batch_size
+        self.max_len = max_len
+    
+    def hold_epoch_preds(self, pred_val, targ_val, epoch):
+        # pred columns name
+        pred_col = self.model_name + '_' + str(self.drop_out) + '_' + str(self.lr) + '_' + str(self.batch_size) + '_' + str(self.max_len) + '_' + str(epoch)
+        
+        if epoch == 1:
+            self.df_fold_preds = pd.DataFrame({'text':self.df_val[config.DATASET_TEXT].values,
+                                'target':targ_val,
+                                pred_col:pred_val})
+        else:
+            self.df_fold_preds[pred_col] = pred_val
+        
+    def concat_fold_preds(self):
+        # concat folder's predictions
+        if os.path.isfile(self.file_fold_preds):
+            df_saved = pd.read_csv(self.file_fold_preds, sep='\t')
+            self.df_fold_preds = pd.concat([df_saved, self.df_fold_preds], ignore_index=True)
+            
+        # save folder preds
+        self.df_fold_preds.to_csv(self.file_fold_preds, index=False, sep='\t')
+    
+    def save_preds(self):
+        if os.path.isfile(self.file_grid_preds):
+            df_grid_preds = pd.read_csv(self.file_grid_preds, sep='\t')
+            self.df_fold_preds = pd.merge(df_grid_preds, self.df_fold_preds, on=['text','target'], how='outer')
+            
+        # save grid preds
+        self.df_fold_preds.to_csv(self.file_grid_preds, index=False, sep='\t')
+        
+        # delete folder preds
+        if os.path.isfile(self.file_fold_preds):
+            os.remove(self.file_fold_preds)
