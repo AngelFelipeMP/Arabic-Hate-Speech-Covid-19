@@ -87,7 +87,7 @@ def run(df_train, df_val, max_len, transformer, batch_size, drop_out, lr, df_res
         acc_val = metrics.accuracy_score(targ_val, pred_val)
         
         # save epoch preds
-        manage_preds.hold_epoch_preds(pred_val, targ_val, epoch)
+        manage_preds.hold_epoch_preds(pred_val, targ_val, epoch, fold)
         
         df_new_results = pd.DataFrame({'epoch':epoch,
                             'transformer':transformer,

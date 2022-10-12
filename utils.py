@@ -54,7 +54,6 @@ def rename_logs():
 
 
 class PredTools:
-    # def __init__(self, data_dict, model_name, heads, drop_out, num_efl, num_dfl, lr ,batch_size, max_len, transformer):
     def __init__(self, df_val, model_name, drop_out, lr ,batch_size, max_len):
         self.file_grid_preds = config.LOGS_PATH + '/' + config.DOMAIN_GRID_SEARCH + '_predictions' +'.tsv'
         self.file_fold_preds = config.LOGS_PATH + '/' + config.DOMAIN_GRID_SEARCH + '_predictions' + '_fold' +'.tsv'
@@ -66,13 +65,14 @@ class PredTools:
         self.batch_size = batch_size
         self.max_len = max_len
     
-    def hold_epoch_preds(self, pred_val, targ_val, epoch):
+    def hold_epoch_preds(self, pred_val, targ_val, epoch, fold):
         # pred columns name
         pred_col = self.model_name + '_' + str(self.drop_out) + '_' + str(self.lr) + '_' + str(self.batch_size) + '_' + str(self.max_len) + '_' + str(epoch)
         
         if epoch == 1:
             self.df_fold_preds = pd.DataFrame({'text':self.df_val[config.DATASET_TEXT].values,
                                 'target':targ_val,
+                                'fold':fold,
                                 pred_col:pred_val})
         else:
             self.df_fold_preds[pred_col] = pred_val
@@ -89,7 +89,7 @@ class PredTools:
     def save_preds(self):
         if os.path.isfile(self.file_grid_preds):
             df_grid_preds = pd.read_csv(self.file_grid_preds, sep='\t')
-            self.df_fold_preds = pd.merge(df_grid_preds, self.df_fold_preds, on=['text','target'], how='outer')
+            self.df_fold_preds = pd.merge(df_grid_preds, self.df_fold_preds, on=['text','target','fold'], how='outer')
             
         # save grid preds
         self.df_fold_preds.to_csv(self.file_grid_preds, index=False, sep='\t')
