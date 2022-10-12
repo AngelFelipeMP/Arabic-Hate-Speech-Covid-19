@@ -69,6 +69,7 @@ class PredTools:
     def hold_epoch_preds(self, pred_val, targ_val, epoch, fold):
         # pred columns name
         pred_col = self.model_name + '_' + str(self.drop_out) + '_' + str(self.lr) + '_' + str(self.batch_size) + '_' + str(self.max_len) + '_' + str(epoch)
+        pred_val = remove_from_list(pred_val)
         
         if epoch == 1:
             self.df_fold_preds = pd.DataFrame({'text':self.df_val[config.DATASET_TEXT].values,
@@ -99,5 +100,17 @@ class PredTools:
         if os.path.isfile(self.file_fold_preds):
             os.remove(self.file_fold_preds)
             
+
+def remove_from_list(pylist):
+        return [item[0] for item in pylist]
             
             
+            
+def convert(preds, threshold=0.5):
+    labels = []
+    for pred in preds:
+        if pred[0] > threshold:
+            labels.append([1])
+        else:
+            labels.append([0])
+    return labels
