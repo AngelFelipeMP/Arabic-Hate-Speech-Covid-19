@@ -75,6 +75,8 @@ class Ensemble:
                 df_metrics = pd.concat([df_metrics, df_new_row], ignore_index=True)
             
         df_metrics.to_csv(self.file_metrics, index=False, sep='\t')
+        
+        
 if __name__ == "__main__":
     ensembles = Ensemble()
     ensembles.create()

@@ -6,7 +6,7 @@ import numpy as np
 import random
 import config
 from tqdm import tqdm
-from utils import PredTools, rename_logs
+from utils import PredTools, rename_logs, convert
 
 from model import TransforomerModel
 import warnings
@@ -48,7 +48,7 @@ def run(df_train, df_val, max_len, transformer, batch_size, drop_out, lr, df_res
     )
 
     device = config.DEVICE if config.DEVICE else torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    model = TransforomerModel(transformer, drop_out, number_of_classes=len(df_train[config.DATASET_LABEL].unique().tolist()))
+    model = TransforomerModel(transformer, drop_out)
     model.to(device)
     
     param_optimizer = list(model.named_parameters())
@@ -79,12 +79,12 @@ def run(df_train, df_val, max_len, transformer, batch_size, drop_out, lr, df_res
     
     for epoch in range(1, config.EPOCHS+1):
         pred_train, targ_train, loss_train = engine.train_fn(train_data_loader, model, optimizer, device, scheduler)
-        f1_train = metrics.f1_score(targ_train, pred_train, average='weighted')
-        acc_train = metrics.accuracy_score(targ_train, pred_train)
+        f1_train = metrics.f1_score(targ_train,convert(pred_train), average='weighted')
+        acc_train = metrics.accuracy_score(targ_train, convert(pred_train))
         
         pred_val, targ_val, loss_val = engine.eval_fn(val_data_loader, model, device)
-        f1_val = metrics.f1_score(targ_val, pred_val, average='weighted')
-        acc_val = metrics.accuracy_score(targ_val, pred_val)
+        f1_val = metrics.f1_score(targ_val, convert(pred_val), average='weighted')
+        acc_val = metrics.accuracy_score(targ_val, convert(pred_val))
         
         # save epoch preds
         manage_preds.hold_epoch_preds(pred_val, targ_val, epoch, fold)
@@ -128,11 +128,6 @@ if __name__ == "__main__":
     rename_logs()
 
     df_data = pd.read_csv(config.DATA_PATH + '/' + config.DATASET_TRAIN, sep='\t', index_col=0, nrows=config.N_ROWS)
-    # df_data = pd.read_csv(config.DATA_PATH + '/' + config.DATASET_TRAIN, sep='\t', index_col=0)
-    # print(df_data)
-    # df_data = df_data.tail(config.N_ROWS).reset_index(drop=True)
-    # print(df_data)
-    
     skf = StratifiedKFold(n_splits=config.SPLITS, shuffle=True, random_state=config.SEED)
 
     df_results = pd.DataFrame(columns=['epoch',

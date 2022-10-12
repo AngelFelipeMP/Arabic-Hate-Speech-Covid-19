@@ -5,17 +5,15 @@ import matplotlib.pyplot as plt
 import config
 
 if __name__ == "__main__":
-    df_train = pd.read_csv(config.DATA_PATH + '/' + config.DATASET_TRAIN, sep='\t')
-    df_dev = pd.read_csv(config.DATA_PATH + '/' + config.DATASET_DEV, sep='\t')
-    df = pd.concat([df_train, df_dev]).reset_index(drop=True)
-
+    df = pd.read_csv(config.DATA_PATH + '/' + config.DATASET_TRAIN, sep='\t')
+    
     for transformer in config.TRANSFORMERS:
         
         print(f'Transformer: {transformer} \n')
 
         tokenizer = AutoTokenizer.from_pretrained(transformer)
 
-        df['tokens'] = df['text_processed'].apply(lambda x: tokenizer.tokenize(x))
+        df['tokens'] = df['Text'].apply(lambda x: tokenizer.tokenize(x))
         df['number_tokens'] = df['tokens'].apply(lambda x: len(x))
 
         ax = df['number_tokens'].plot.hist(bins=20, range=(0, 512))
