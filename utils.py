@@ -6,6 +6,7 @@ import gdown
 import config
 from preprocess import ArabertPreprocessor
 from datetime import datetime
+from sklearn import metrics
 
 def download_data(data_path, data_urls):
     # create a data folder
@@ -88,8 +89,8 @@ class PredTools:
     
     def save_preds(self):
         if os.path.isfile(self.file_grid_preds):
-            df_grid_preds = pd.read_csv(self.file_grid_preds, sep='\t')
-            self.df_fold_preds = pd.merge(df_grid_preds, self.df_fold_preds, on=['text','target','fold'], how='outer')
+            self.df_preds = pd.read_csv(self.file_grid_preds, sep='\t')
+            self.df_fold_preds = pd.merge(self.df_preds, self.df_fold_preds, on=['text','target','fold'], how='outer')
             
         # save grid preds
         self.df_fold_preds.to_csv(self.file_grid_preds, index=False, sep='\t')
@@ -97,3 +98,6 @@ class PredTools:
         # delete folder preds
         if os.path.isfile(self.file_fold_preds):
             os.remove(self.file_fold_preds)
+            
+            
+            

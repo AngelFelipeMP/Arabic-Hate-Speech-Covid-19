@@ -16,7 +16,8 @@ REPO_PATH = '/'.join(CODE_PATH.split('/')[0:-1])
 DATA_PATH = REPO_PATH + '/' + 'data'
 LOGS_PATH = REPO_PATH + '/' + 'logs'
 
-
+# DATA_URL = ['https://drive.google.com/drive/folders/1Mp80KCIdWpV_uiuQJLBRosawCKLxiOY_?usp=sharing']
+DATA_URL = ['https://drive.google.com/drive/folders/1nv0QpAi9Hn9u_sZ4xy2wOZPeYaCUcGS5?usp=sharing']
 
 DATASET_TEXT = 'Text'
 DATASET_LABEL = 'Contains_Fake_Information'

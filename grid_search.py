@@ -127,7 +127,12 @@ if __name__ == "__main__":
     #rename old log files adding date YMD-HMS
     rename_logs()
 
-    df_data = pd.read_csv(config.DATA_PATH + '/' + config.DATASET_TRAIN, sep='\t', nrows=config.N_ROWS)
+    df_data = pd.read_csv(config.DATA_PATH + '/' + config.DATASET_TRAIN, sep='\t', index_col=0, nrows=config.N_ROWS)
+    # df_data = pd.read_csv(config.DATA_PATH + '/' + config.DATASET_TRAIN, sep='\t', index_col=0)
+    # print(df_data)
+    # df_data = df_data.tail(config.N_ROWS).reset_index(drop=True)
+    # print(df_data)
+    
     skf = StratifiedKFold(n_splits=config.SPLITS, shuffle=True, random_state=config.SEED)
 
     df_results = pd.DataFrame(columns=['epoch',
@@ -187,4 +192,4 @@ if __name__ == "__main__":
                                                                                             'f1-macro_val',
                                                                                             'loss_val'].mean()
                         
-                        df_results.to_csv(config.LOGS_PATH + '/' + config.DOMAIN_GRID_SEARCH + '.csv', index=False)
+                        df_results.to_csv(config.LOGS_PATH + '/' + config.DOMAIN_GRID_SEARCH + '.tsv', index=False, sep='\t')
