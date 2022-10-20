@@ -112,7 +112,7 @@ def run(df_train, df_val, max_len, transformer, batch_size, drop_out, lr, df_res
             
     # avg and save logs
     if fold == config.SPLITS:
-        # save all folds preds "gridsearch"
+        # save all folds preds "kfold"
         manage_preds.save_preds()
     
     
@@ -146,7 +146,7 @@ if __name__ == "__main__":
     )
     
     inter = len(config.TRANSFORMERS) * len(config.MAX_LEN) * len(config.BATCH_SIZE) * len(config.DROPOUT) * len(config.LR) * config.SPLITS
-    grid_search_bar = tqdm(total=inter, desc='GRID SEARCH', position=1)
+    cross_validation_search_bar = tqdm(total=inter, desc='CROSS VALIDATION', position=1)
     
 
     for transformer in tqdm(config.TRANSFORMERS, desc='TRANSFOMERS', position=0):
@@ -172,7 +172,7 @@ if __name__ == "__main__":
                                                 fold
                             )
                         
-                            grid_search_bar.update(1)
+                            cross_validation_search_bar.update(1)
 
                         
                         df_results = df_results.groupby(['epoch',
@@ -187,4 +187,4 @@ if __name__ == "__main__":
                                                                                             'f1-macro_val',
                                                                                             'loss_val'].mean()
                         
-                        df_results.to_csv(config.LOGS_PATH + '/' + config.DOMAIN_GRID_SEARCH + '.tsv', index=False, sep='\t')
+                        df_results.to_csv(config.LOGS_PATH + '/' + config.DOMAIN_CROSS_VALIDATION + '.tsv', index=False, sep='\t')

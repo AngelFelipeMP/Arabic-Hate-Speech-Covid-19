@@ -25,10 +25,11 @@ DATASET_TRAIN = 'train_hate_speech_preprocessed.tsv'
 DATASET_TEST = 'test_hate_speech_preprocessed.tsv'
 
 
-DOMAIN_GRID_SEARCH = 'gridsearch'
-DOMAIN_TRAIN = 'training'
-DOMAIN_VALIDATION = 'validation'
-DOMAIN_TRAIN_ALL_DATA = 'all_data_training'
+# DOMAIN_GRID_SEARCH = 'gridsearch'
+# DOMAIN_TRAIN = 'training'
+# DOMAIN_VALIDATION = 'validation'
+# DOMAIN_TRAIN_ALL_DATA = 'all_data_training'
+DOMAIN_CROSS_VALIDATION = 'cross_validation'
 DOMAIN_TEST = 'test'
 
 TRAIN_WORKERS = 1

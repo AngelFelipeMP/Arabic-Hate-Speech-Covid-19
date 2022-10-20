@@ -57,8 +57,8 @@ def rename_logs():
 class PredTools:
     def __init__(self, df_val, model_name, drop_out, lr ,batch_size, max_len):
         self.file_test_preds = config.LOGS_PATH + '/' + config.DOMAIN_TEST + '_predictions' +'.tsv'
-        self.file_grid_preds = config.LOGS_PATH + '/' + config.DOMAIN_GRID_SEARCH + '_predictions' +'.tsv'
-        self.file_fold_preds = config.LOGS_PATH + '/' + config.DOMAIN_GRID_SEARCH + '_predictions' + '_fold' +'.tsv'
+        self.file_cross_validation_preds = config.LOGS_PATH + '/' + config.DOMAIN_CROSS_VALIDATION + '_predictions' +'.tsv'
+        self.file_fold_preds = config.LOGS_PATH + '/' + config.DOMAIN_CROSS_VALIDATION + '_predictions' + '_fold' +'.tsv'
         self.df_val = df_val
         self.list_df = []
         self.model_name = model_name.split("/")[-1]
@@ -92,13 +92,13 @@ class PredTools:
         self.df_fold_preds.to_csv(self.file_fold_preds, index=False, sep='\t')
     
     def save_preds(self):
-        file_path = self.file_test_preds if self.test_model else self.file_grid_preds
+        file_path = self.file_test_preds if self.test_model else self.file_cross_validation_preds
         
         if os.path.isfile(file_path):
             self.df_preds = pd.read_csv(file_path, sep='\t')
             self.df_fold_preds = pd.merge(self.df_preds, self.df_fold_preds, on=['text','target','fold'], how='outer')
             
-        # save grid preds
+        # save cross_validation preds
         self.df_fold_preds.to_csv(file_path, index=False, sep='\t')
         
         # delete folder preds

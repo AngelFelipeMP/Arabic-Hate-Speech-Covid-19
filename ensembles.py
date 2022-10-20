@@ -91,7 +91,7 @@ if __name__ == "__main__":
     if args.test:
         domain = config.DOMAIN_TEST 
     elif args.kfold:
-        domain = config.DOMAIN_GRID_SEARCH
+        domain = config.DOMAIN_CROSS_VALIDATION
     else:
         raise Exception('Please specify the domain: test or kfold')
 
