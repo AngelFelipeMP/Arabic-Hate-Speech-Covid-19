@@ -43,8 +43,7 @@ class Ensemble:
         
     
     def calculate(self, ensemble, epoch):
-        f1_val= []
-        acc_val= []
+        f1_val, acc_val, recall_val, prec_val= [], [], [], []
         
         for fold in range(1, config.SPLITS+1):
             pred_val = self.df_preds.loc[ self.df_preds['fold']==fold, [ensemble + '_' + str(epoch)]].values
@@ -52,8 +51,10 @@ class Ensemble:
             
             f1_val.append(metrics.f1_score(targ_val, pred_val, average='binary'))
             acc_val.append(metrics.accuracy_score(targ_val, pred_val))
+            prec_val.append(metrics.precision_score(targ_val, pred_val, average='binary'))
+            recall_val.append(metrics.recall_score(targ_val, pred_val, average='binary'))
             
-        return sum(f1_val)/len(f1_val), sum(acc_val)/len(acc_val)
+        return sum(f1_val)/len(f1_val), sum(acc_val)/len(acc_val), sum(prec_val)/len(prec_val), sum(recall_val)/len(recall_val)
 
     
     def results_ensemble(self):
@@ -62,7 +63,7 @@ class Ensemble:
         for epoch in range(1, config.EPOCHS+1):
             for ensemble in ['Majority_vote', 'Highest_sum']:
             
-                f1_val, acc_val = self.calculate(ensemble, epoch)
+                f1_val, acc_val, prec_val, recall_val = self.calculate(ensemble, epoch)
             
                 df_new_row = pd.DataFrame({'epoch':epoch,
                                     'transformer':ensemble,
@@ -71,10 +72,12 @@ class Ensemble:
                                     'lr':None,
                                     'dropout':None,
                                     'accuracy_train':None,
-                                    'f1-binary_train':None,
+                                    'f1-score_train':None,
                                     'loss_train':None,
                                     'accuracy_val':acc_val,
-                                    'f1-binary_val':f1_val,
+                                    'f1-score_val':f1_val,
+                                    'precision_val':prec_val,
+                                    'recall_val':recall_val,
                                     'loss_val':None
                                 }, index=[0]
                 ) 
