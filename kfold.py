@@ -87,7 +87,7 @@ def run(df_train, df_val, max_len, transformer, batch_size, drop_out, lr, df_res
         acc_val = metrics.accuracy_score(targ_val, convert(pred_val))
         
         # save epoch preds
-        manage_preds.hold_epoch_preds(pred_val, targ_val, epoch, fold)
+        manage_preds.hold_epoch_preds(epoch, pred_val, targ_val, fold)
         
         df_new_results = pd.DataFrame({'epoch':epoch,
                             'transformer':transformer,
@@ -159,7 +159,7 @@ if __name__ == "__main__":
                             df_train = df_data.loc[train_index]
                             df_val = df_data.loc[val_index]
                             
-                            tqdm.write(f'\nTransfomer: {transformer.split("/")[-1]} Max_len: {max_len} Batch_size: {batch_size} Dropout: {drop_out} lr: {lr} Fold: {fold+1}/{config.SPLITS}')
+                            tqdm.write(f'\nTransfomer: {transformer.split("/")[-1]} Max_len: {max_len} Batch_size: {batch_size} Dropout: {drop_out} lr: {lr} Fold: {fold}/{config.SPLITS}')
                             
                             df_results = run(df_train,
                                                 df_val, 

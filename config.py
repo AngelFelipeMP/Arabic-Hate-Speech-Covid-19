@@ -32,7 +32,8 @@ DOMAIN_TRAIN_ALL_DATA = 'all_data_training'
 DOMAIN_TEST = 'test'
 
 TRAIN_WORKERS = 1
-VAL_WORKERS = 1 
+VAL_WORKERS = 1
+TEST_WORKERS = 1 
 LOGS_PATH = REPO_PATH + '/' + 'logs'
 
 # TRANSFORMERS = ['aubmindlab/araelectra-base-discriminator',

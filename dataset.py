@@ -2,7 +2,7 @@ import torch
 from transformers import AutoTokenizer
 
 class TransformerDataset:
-    def __init__(self, text, target, max_len, transformer):
+    def __init__(self, text, max_len, transformer, target=None):
         self.text = text
         self.target = target
         self.max_len = max_len
@@ -28,6 +28,7 @@ class TransformerDataset:
         )
         
         inputs = {k:torch.tensor(v, dtype=torch.long) for k,v in inputs.items()}
-        inputs['targets'] = torch.tensor(self.target[item], dtype=torch.long)
+        if self.target is not None:
+            inputs['targets'] = torch.tensor(self.target[item], dtype=torch.long)
         
         return inputs

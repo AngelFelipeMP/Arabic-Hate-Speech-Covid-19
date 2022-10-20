@@ -1,21 +1,26 @@
 import pandas as pd
 import config
 from sklearn import metrics
+import argparse
 
 class Ensemble:
-    def __init__(self):
-        self.file_preds = config.LOGS_PATH + '/' + config.DOMAIN_GRID_SEARCH + '_predictions' +'.tsv'
-        self.file_metrics = config.LOGS_PATH + '/' + config.DOMAIN_GRID_SEARCH + '.tsv'
+    def __init__(self, domain):
+        self.domain = domain
+        self.file_preds = config.LOGS_PATH + '/' + domain + '_predictions' +'.tsv'
+        self.file_metrics = config.LOGS_PATH + '/' + domain + '.tsv'
         
     
     def create(self):
-        df_metrics = pd.read_csv(self.file_metrics, sep='\t')
+        # df_metrics = pd.read_csv(self.file_metrics, sep='\t')
+        df_preds = pd.read_csv(self.file_preds, sep='\t')
         
-        if any(ensemble in df_metrics['transformer'].values for ensemble in ['Highest_sum', 'Majority_vote']):
+        # if any(ensemble in df_metrics['transformer'].values for ensemble in ['Highest_sum', 'Majority_vote']):
+        if df_preds.columns[-1].startswith('Highest_sum') or df_preds.columns[-1].startswith('Majority_vote'):
             print('Ensemble already created')
         else:
             self.col_ensembles()
-            self.results_ensemble()
+            if 'test' not in self.domain:
+                self.results_ensemble()
             print('Ensemble created')
     
     def col_ensembles(self):
@@ -78,5 +83,17 @@ class Ensemble:
         
         
 if __name__ == "__main__":
-    ensembles = Ensemble()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--test", default=False, help="Must be True or False", action='store_true')
+    parser.add_argument("--kfold", default=False, help="Must be True or False", action='store_true')
+    args = parser.parse_args()
+
+    if args.test:
+        domain = config.DOMAIN_TEST 
+    elif args.kfold:
+        domain = config.DOMAIN_GRID_SEARCH
+    else:
+        raise Exception('Please specify the domain: test or kfold')
+
+    ensembles = Ensemble(domain)
     ensembles.create()

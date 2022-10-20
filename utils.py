@@ -56,6 +56,7 @@ def rename_logs():
 
 class PredTools:
     def __init__(self, df_val, model_name, drop_out, lr ,batch_size, max_len):
+        self.file_test_preds = config.LOGS_PATH + '/' + config.DOMAIN_TEST + '_predictions' +'.tsv'
         self.file_grid_preds = config.LOGS_PATH + '/' + config.DOMAIN_GRID_SEARCH + '_predictions' +'.tsv'
         self.file_fold_preds = config.LOGS_PATH + '/' + config.DOMAIN_GRID_SEARCH + '_predictions' + '_fold' +'.tsv'
         self.df_val = df_val
@@ -66,7 +67,9 @@ class PredTools:
         self.batch_size = batch_size
         self.max_len = max_len
     
-    def hold_epoch_preds(self, pred_val, targ_val, epoch, fold):
+    def hold_epoch_preds(self, epoch, pred_val, targ_val=1001, fold=1):
+        self.test_model = True if targ_val==1001 else False
+        
         # pred columns name
         pred_col = self.model_name + '_' + str(self.drop_out) + '_' + str(self.lr) + '_' + str(self.batch_size) + '_' + str(self.max_len) + '_' + str(epoch)
         pred_val = remove_from_list(pred_val)
@@ -89,12 +92,14 @@ class PredTools:
         self.df_fold_preds.to_csv(self.file_fold_preds, index=False, sep='\t')
     
     def save_preds(self):
-        if os.path.isfile(self.file_grid_preds):
-            self.df_preds = pd.read_csv(self.file_grid_preds, sep='\t')
+        file_path = self.file_test_preds if self.test_model else self.file_grid_preds
+        
+        if os.path.isfile(file_path):
+            self.df_preds = pd.read_csv(file_path, sep='\t')
             self.df_fold_preds = pd.merge(self.df_preds, self.df_fold_preds, on=['text','target','fold'], how='outer')
             
         # save grid preds
-        self.df_fold_preds.to_csv(self.file_grid_preds, index=False, sep='\t')
+        self.df_fold_preds.to_csv(file_path, index=False, sep='\t')
         
         # delete folder preds
         if os.path.isfile(self.file_fold_preds):
