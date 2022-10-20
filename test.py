@@ -77,7 +77,7 @@ def run(df_train, df_test, max_len, transformer, batch_size, drop_out, lr, df_re
     
     for epoch in range(1, config.EPOCHS+1):
         pred_train, targ_train, loss_train = engine.train_fn(train_data_loader, model, optimizer, device, scheduler)
-        f1_train = metrics.f1_score(targ_train,convert(pred_train), average='weighted')
+        f1_train = metrics.f1_score(targ_train,convert(pred_train), average='binary')
         acc_train = metrics.accuracy_score(targ_train, convert(pred_train))
         
         pred_test = engine.test_fn(test_data_loader, model, device)
@@ -92,13 +92,13 @@ def run(df_train, df_test, max_len, transformer, batch_size, drop_out, lr, df_re
                             'lr':lr,
                             'dropout':drop_out,
                             'accuracy_train':acc_train,
-                            'f1-macro_train':f1_train,
+                            'f1-binary_train':f1_train,
                             'loss_train':loss_train,
                         }, index=[0]
         ) 
         df_results = pd.concat([df_results, df_new_results], ignore_index=True)
         
-        tqdm.write("Epoch {}/{} f1-macro_training = {:.3f}  accuracy_training = {:.3f}  loss_training = {:.3f}".format(epoch, config.EPOCHS, f1_train, acc_train, loss_train))
+        tqdm.write("Epoch {}/{} f1-binary_training = {:.3f}  accuracy_training = {:.3f}  loss_training = {:.3f}".format(epoch, config.EPOCHS, f1_train, acc_train, loss_train))
 
     # save predicitons
     manage_preds.save_preds()
@@ -125,7 +125,7 @@ if __name__ == "__main__":
                                         'lr',
                                         'dropout',
                                         'accuracy_train',
-                                        'f1-macro_train',
+                                        'f1-binary_train',
                                         'loss_train',
             ]
     )

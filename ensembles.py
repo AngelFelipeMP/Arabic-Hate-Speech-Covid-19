@@ -2,6 +2,8 @@ import pandas as pd
 import config
 from sklearn import metrics
 import argparse
+import warnings
+warnings.filterwarnings('ignore')
 
 class Ensemble:
     def __init__(self, domain):
@@ -48,7 +50,7 @@ class Ensemble:
             pred_val = self.df_preds.loc[ self.df_preds['fold']==fold, [ensemble + '_' + str(epoch)]].values
             targ_val = self.df_preds.loc[ self.df_preds['fold']==fold, ['target']].values
             
-            f1_val.append(metrics.f1_score(targ_val, pred_val, average='weighted'))
+            f1_val.append(metrics.f1_score(targ_val, pred_val, average='binary'))
             acc_val.append(metrics.accuracy_score(targ_val, pred_val))
             
         return sum(f1_val)/len(f1_val), sum(acc_val)/len(acc_val)
@@ -69,10 +71,10 @@ class Ensemble:
                                     'lr':None,
                                     'dropout':None,
                                     'accuracy_train':None,
-                                    'f1-macro_train':None,
+                                    'f1-binary_train':None,
                                     'loss_train':None,
                                     'accuracy_val':acc_val,
-                                    'f1-macro_val':f1_val,
+                                    'f1-binary_val':f1_val,
                                     'loss_val':None
                                 }, index=[0]
                 ) 

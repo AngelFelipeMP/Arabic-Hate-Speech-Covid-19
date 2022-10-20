@@ -81,11 +81,11 @@ def run(df_train, df_val, max_len, transformer, batch_size, drop_out, lr, df_res
     
     for epoch in range(1, config.EPOCHS+1):
         pred_train, targ_train, loss_train = engine.train_fn(train_data_loader, model, optimizer, device, scheduler)
-        f1_train = metrics.f1_score(targ_train,convert(pred_train), average='weighted')
+        f1_train = metrics.f1_score(targ_train,convert(pred_train), average='binary')
         acc_train = metrics.accuracy_score(targ_train, convert(pred_train))
         
         pred_val, targ_val, loss_val = engine.eval_fn(val_data_loader, model, device)
-        f1_val = metrics.f1_score(targ_val, convert(pred_val), average='weighted')
+        f1_val = metrics.f1_score(targ_val, convert(pred_val), average='binary')
         acc_val = metrics.accuracy_score(targ_val, convert(pred_val))
         
         # save epoch preds
@@ -98,16 +98,16 @@ def run(df_train, df_val, max_len, transformer, batch_size, drop_out, lr, df_res
                             'lr':lr,
                             'dropout':drop_out,
                             'accuracy_train':acc_train,
-                            'f1-macro_train':f1_train,
+                            'f1-binary_train':f1_train,
                             'loss_train':loss_train,
                             'accuracy_val':acc_val,
-                            'f1-macro_val':f1_val,
+                            'f1-binary_val':f1_val,
                             'loss_val':loss_val
                         }, index=[0]
         ) 
         df_results = pd.concat([df_results, df_new_results], ignore_index=True)
         
-        tqdm.write("Epoch {}/{} f1-macro_training = {:.3f}  accuracy_training = {:.3f}  loss_training = {:.3f} f1-macro_val = {:.3f}  accuracy_val = {:.3f}  loss_val = {:.3f}".format(epoch, config.EPOCHS, f1_train, acc_train, loss_train, f1_val, acc_val, loss_val))
+        tqdm.write("Epoch {}/{} f1-binary_training = {:.3f}  accuracy_training = {:.3f}  loss_training = {:.3f} f1-binary_val = {:.3f}  accuracy_val = {:.3f}  loss_val = {:.3f}".format(epoch, config.EPOCHS, f1_train, acc_train, loss_train, f1_val, acc_val, loss_val))
 
     # save a fold preds
     manage_preds.concat_fold_preds()
@@ -139,10 +139,10 @@ if __name__ == "__main__":
                                         'lr',
                                         'dropout',
                                         'accuracy_train',
-                                        'f1-macro_train',
+                                        'f1-binary_train',
                                         'loss_train',
                                         'accuracy_val',
-                                        'f1-macro_val',
+                                        'f1-binary_val',
                                         'loss_val'
             ]
     )
@@ -183,10 +183,10 @@ if __name__ == "__main__":
                                                         'batch_size',
                                                         'lr',
                                                         'dropout'], as_index=False, sort=False)['accuracy_train',
-                                                                                            'f1-macro_train',
+                                                                                            'f1-binary_train',
                                                                                             'loss_train',
                                                                                             'accuracy_val',
-                                                                                            'f1-macro_val',
+                                                                                            'f1-binary_val',
                                                                                             'loss_val'].mean()
                         
                         df_results.to_csv(config.LOGS_PATH + '/' + config.DOMAIN_CROSS_VALIDATION + '.tsv', index=False, sep='\t')
