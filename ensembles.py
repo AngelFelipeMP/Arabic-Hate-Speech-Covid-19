@@ -135,10 +135,3 @@ if __name__ == "__main__":
 
     ensembles = Ensemble(domain)
     ensembles.create()
-    
-    
-    
-            #TODO:
-        # -create a table fo the paper draft 
-        # -save final predictions
-        # - change the name of the ensembles script
